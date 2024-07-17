@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日蛋糕粒子效果</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: black;
+            font-family: Arial, sans-serif;
+        }
+        #fireworksCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworksCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const colors = [
+            '255, 69, 0', // Red-Orange
+            '255, 140, 0', // Dark Orange
+            '255, 165, 0', // Orange
+            '255, 99, 71', // Tomato
+            '255, 255, 0', // Yellow
+            '255, 182, 193', // Light Pink
+            '255, 105, 180', // Hot Pink
+            '238, 130, 238' // Violet
+        ];
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.alpha = Math.random();
+                this.size = 2;
+                this.flashSpeed = Math.random() * 0.02 + 0.01;
+            }
+
+            update() {
+                this.alpha += this.flashSpeed;
+                if (this.alpha > 1 || this.alpha < 0) {
+                    this.flashSpeed = -this.flashSpeed;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+                ctx.fill();
+            }
+        }
+
+        function createCakeParticles() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const cakeWidth = 200;
+            const cakeHeight = 100;
+            const candleHeight = 50;
+
+            // Cake base
+            for (let y = 0; y < cakeHeight; y += 4) {
+                for (let x = 0; x < cakeWidth; x += 4) {
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    particles.push(new Particle(centerX - cakeWidth / 2 + x, centerY - cakeHeight / 2 + y, color));
+                }
+            }
+
+            // Candles
+            const candleWidth = 10;
+            for (let i = -1; i <= 1; i++) {
+                for (let y = 0; y < candleHeight; y += 4) {
+                    for (let x = 0; x < candleWidth; x += 4) {
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+                        particles.push(new Particle(centerX + i * cakeWidth / 4 + x - candleWidth / 2, centerY - cakeHeight / 2 - y, color));
+                    }
+                }
+            }
+
+            // Candle flames
+            for (let i = -1; i <= 1; i++) {
+                const color = '255, 165, 0';
+                particles.push(new Particle(centerX + i * cakeWidth / 4, centerY - cakeHeight / 2 - candleHeight, color));
+            }
+        }
+
+        function loop() {
+            requestAnimationFrame(loop);
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'lighter';
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+        }
+
+        createCakeParticles();
+        loop();
+    </script>
+</body>
+</html>
